@@ -84,3 +84,97 @@ export async function getProfile(accessToken: string): Promise<Clinician> {
   return response.json();
 }
 
+interface Course {
+  id: string;
+  name: string;
+  link: string;
+}
+
+interface AllCourse {
+  id: string;
+  name: string;
+}
+
+interface CoursesResponse {
+  isStandardPaid: boolean;
+  isPremiumPaid: boolean;
+  courses: Course[];
+  allCourses: AllCourse[];
+}
+
+export async function getCourses(accessToken: string): Promise<CoursesResponse> {
+  const response = await fetch(`${baseURL}/clinicians/courses`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to fetch courses');
+  }
+
+  return response.json();
+}
+
+interface CheckoutResponse {
+  sessionId: string;
+  url: string;
+  amount: number;
+  currency: string;
+}
+
+export async function checkoutStandard(
+  accessToken: string,
+  courseIds: string[]
+): Promise<CheckoutResponse> {
+  const amount = courseIds.length * 499;
+  
+  const response = await fetch(`${baseURL}/payments/clinicians/checkout/standard`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      amount,
+      currency: 'inr',
+      description: 'Standard Plan',
+      courseIds,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Checkout failed');
+  }
+
+  return response.json();
+}
+
+export async function checkoutPremium(
+  accessToken: string
+): Promise<CheckoutResponse> {
+  const amount = 499 * 6;
+  
+  const response = await fetch(`${baseURL}/payments/clinicians/checkout/premium`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      amount,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Checkout failed');
+  }
+
+  return response.json();
+}
+

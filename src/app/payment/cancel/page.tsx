@@ -25,15 +25,8 @@ export default function PaymentCancelPage() {
         
         <div className="space-y-3">
           <button
-            onClick={() => router.push('/pricing')}
-            className="w-full py-3 px-6 bg-gradient-to-r from-[#8B2D6C] to-[#704180] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity"
-          >
-            Back to Pricing
-          </button>
-          
-          <button
             onClick={() => router.push('/dashboard')}
-            className="w-full py-3 px-6 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+            className="w-full py-3 px-6 bg-gradient-to-r from-[#8B2D6C] to-[#704180] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity"
           >
             Go to Dashboard
           </button>

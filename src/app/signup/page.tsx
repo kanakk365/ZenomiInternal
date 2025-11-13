@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
@@ -10,6 +10,7 @@ import { useAuthStore } from "@/store/authStore";
 export default function SignupPage() {
   const router = useRouter();
   const { setAuth, accessToken, _hasHydrated } = useAuthStore();
+  const hasRedirected = useRef(false);
   const [isSignIn, setIsSignIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,8 +35,9 @@ export default function SignupPage() {
   });
 
   useEffect(() => {
-    if (_hasHydrated && accessToken) {
-      router.push("/pricing");
+    if (_hasHydrated && accessToken && !hasRedirected.current) {
+      hasRedirected.current = true;
+      router.replace("/dashboard");
     }
   }, [accessToken, _hasHydrated, router]);
 
@@ -71,7 +73,7 @@ export default function SignupPage() {
           refreshToken: response.refreshToken,
           clinician: response.clinician,
         });
-        router.replace("/pricing"); // Redirect to pricing page
+        router.replace("/dashboard"); // Redirect to dashboard
       } else {
         // Signup
         if (formData.password !== formData.confirmPassword) {
@@ -97,7 +99,7 @@ export default function SignupPage() {
           refreshToken: response.refreshToken,
           clinician: response.clinician,
         });
-        router.replace("/pricing"); // Redirect to pricing page
+        router.replace("/dashboard"); // Redirect to dashboard
       }
     } catch (err) {
       const errorMessage =

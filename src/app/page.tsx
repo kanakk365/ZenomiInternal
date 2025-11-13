@@ -12,9 +12,9 @@ export default function Home() {
     if (!_hasHydrated) return;
 
     if (accessToken) {
-      router.push("/dashboard");
+      router.replace("/dashboard");
     } else {
-      router.push("/signup");
+      router.replace("/signup");
     }
   }, [accessToken, _hasHydrated, router]);
 
