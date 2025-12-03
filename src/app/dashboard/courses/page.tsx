@@ -1,25 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import type { ElementType } from "react";
-import { useRouter } from "next/navigation";
-import { CalendarClock, GraduationCap, Crown, BookOpen, X } from "lucide-react";
-
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
-import {
-  getProfile,
-  getCourses,
-  checkoutStandard,
-  checkoutPremium,
-} from "@/lib/api/auth";
-
-interface StatCard {
-  label: string;
-  value: string;
-  icon: ElementType;
-  caption?: string;
-  accentColor: string;
-}
+import { getCourses, checkoutStandard, checkoutPremium } from "@/lib/api/auth";
 
 interface CourseCard {
   id: string;
@@ -49,14 +33,11 @@ const SINGLE_COURSE: CourseCard = {
   link: "https://kanakk365.github.io/zenomi-course/",
 };
 
-export default function Dashboard() {
-  const { clinician, accessToken, _hasHydrated, setAuth } = useAuthStore();
-  const router = useRouter();
-  const hasRedirected = useRef(false);
+export default function CoursesPage() {
+  const { accessToken, _hasHydrated } = useAuthStore();
   const [activeTab, setActiveTab] = useState<"purchased" | "trending">(
     "purchased"
   );
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [purchasedCourses, setPurchasedCourses] = useState<CourseCard[]>([]);
   const [trendingCourses, setTrendingCourses] = useState<CourseCard[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<CourseCard | null>(null);
@@ -67,8 +48,6 @@ export default function Dashboard() {
   );
   const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
-  const [isStandardPaid, setIsStandardPaid] = useState(false);
-  const [isPremiumPaid, setIsPremiumPaid] = useState(false);
 
   // Suppress cross-origin security errors from iframe
   useEffect(() => {
@@ -107,41 +86,6 @@ export default function Dashboard() {
     };
   }, []);
 
-  useEffect(() => {
-    if (_hasHydrated && !accessToken && !hasRedirected.current) {
-      hasRedirected.current = true;
-      router.replace("/signup");
-    }
-  }, [accessToken, _hasHydrated, router]);
-
-  // Fetch profile data on mount
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!accessToken || !_hasHydrated) return;
-
-      setIsLoadingProfile(true);
-      try {
-        const profileData = await getProfile(accessToken);
-        // Update the store with fresh profile data
-        if (accessToken) {
-          const { refreshToken } = useAuthStore.getState();
-          setAuth({
-            accessToken,
-            refreshToken: refreshToken || "",
-            clinician: profileData,
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch profile:", error);
-        // If profile fetch fails, don't redirect - just log the error
-      } finally {
-        setIsLoadingProfile(false);
-      }
-    };
-
-    fetchProfile();
-  }, [accessToken, _hasHydrated, setAuth]);
-
   // Fetch courses data
   useEffect(() => {
     const fetchCourses = async () => {
@@ -150,10 +94,6 @@ export default function Dashboard() {
       setIsLoadingCourses(true);
       try {
         const coursesData = await getCourses(accessToken);
-
-        // Store payment status
-        setIsStandardPaid(coursesData.isStandardPaid);
-        setIsPremiumPaid(coursesData.isPremiumPaid);
 
         // If user has paid (standard or premium), show only the single course
         if (coursesData.isStandardPaid || coursesData.isPremiumPaid) {
@@ -260,48 +200,13 @@ export default function Dashboard() {
     }
   };
 
-  if (!_hasHydrated || isLoadingProfile || isLoadingCourses) {
+  if (!_hasHydrated || isLoadingCourses) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F5F0F8]">
-        <div className="text-xl text-[#704180]">Loading your dashboard...</div>
+        <div className="text-xl text-[#704180]">Loading courses...</div>
       </div>
     );
   }
-
-  if (!clinician) {
-    return null;
-  }
-
-  const stats: StatCard[] = [
-    {
-      label: "Total Courses Purchased",
-      value: purchasedCourses.length.toString(),
-      caption: "All-time access",
-      icon: GraduationCap,
-      accentColor: "bg-[#E3D6FF] text-[#704180]",
-    },
-    {
-      label: "Available Courses",
-      value: trendingCourses.length.toString(),
-      caption: "Ready to explore",
-      icon: BookOpen,
-      accentColor: "bg-[#DFF3F0] text-[#218B75]",
-    },
-    {
-      label: "Pro Annual Plan",
-      value: "Pro",
-      caption: "Upgrades available",
-      icon: Crown,
-      accentColor: "bg-[#FFF0D7] text-[#C58B27]",
-    },
-    {
-      label: "Membership Duration",
-      value: "Active",
-      caption: "Premium access",
-      icon: CalendarClock,
-      accentColor: "bg-[#FFE5F1] text-[#D94875]",
-    },
-  ];
 
   const courses =
     activeTab === "purchased" ? purchasedCourses : trendingCourses;
@@ -309,40 +214,10 @@ export default function Dashboard() {
   return (
     <div className="flex w-full flex-col gap-10">
       <section className="space-y-3">
-        <p className="text-lg font-medium text-[#53456B]">
-          Hello, <span className="font-semibold">{clinician.ownerName}</span> 👋
+        <h1 className="text-3xl font-semibold text-[#2C1B3A]">My Courses</h1>
+        <p className="text-lg text-[#53456B]">
+          Explore your purchased courses and discover new trending content
         </p>
-        <h1 className="text-3xl font-semibold text-[#2C1B3A]">
-          How can I help you today?
-        </h1>
-      </section>
-
-      <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="rounded-3xl bg-white p-6 shadow-[0_6px_24px_rgba(112,65,128,0.08)] transition-transform duration-200 hover:-translate-y-1"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-[#8F82B0]">
-                  {stat.label}
-                </p>
-              </div>
-              <div className="mt-5 flex items-center justify-between">
-                <p className="text-3xl font-semibold text-[#2C1B3A]">
-                  {stat.value}
-                </p>
-                <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-full ${stat.accentColor}`}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-              </div>
-            </div>
-          );
-        })}
       </section>
 
       <section className="space-y-6 rounded-3xl bg-white p-6 shadow-[0_6px_24px_rgba(112,65,128,0.08)]">
