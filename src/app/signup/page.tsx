@@ -89,7 +89,7 @@ export default function SignupPage() {
           email: formData.email,
           password: formData.password,
           ownerName: formData.ownerName,
-          licenseNumber: formData.licenseNumber,
+          licenseNumber: formData.licenseNumber || undefined,
           position: formData.position,
           website: formData.website || undefined,
         });
@@ -182,21 +182,19 @@ export default function SignupPage() {
             <div className="flex gap-1 bg-[#F2EEF4] p-1 rounded-lg">
               <button
                 onClick={() => setIsSignIn(false)}
-                className={`flex-1 py-2.5 px-5 rounded-lg text-base font-normal text-center transition-colors ${
-                  !isSignIn
+                className={`flex-1 py-2.5 px-5 rounded-lg text-base font-normal text-center transition-colors ${!isSignIn
                     ? "bg-gradient-to-r from-[#8B2D6C] to-[#704180] text-white"
                     : "text-[#9C9AA5] hover:bg-white/50"
-                }`}
+                  }`}
               >
                 Sign Up
               </button>
               <button
                 onClick={() => setIsSignIn(true)}
-                className={`flex-1 py-2.5 px-5 rounded-lg text-base font-normal text-center transition-colors ${
-                  isSignIn
+                className={`flex-1 py-2.5 px-5 rounded-lg text-base font-normal text-center transition-colors ${isSignIn
                     ? "bg-gradient-to-r from-[#8B2D6C] to-[#704180] text-white"
                     : "text-[#9C9AA5] hover:bg-white/50"
-                }`}
+                  }`}
               >
                 Sign In
               </button>
@@ -392,7 +390,7 @@ export default function SignupPage() {
 
               <div className="space-y-2">
                 <label className="block text-base font-normal text-[#26203B]">
-                  License Number
+                  License Number (Optional)
                 </label>
                 <input
                   type="text"
@@ -401,7 +399,6 @@ export default function SignupPage() {
                   onChange={handleInputChange}
                   placeholder="Enter License Number"
                   className="w-full px-4 py-2 border border-[rgba(136,136,136,0.4)] rounded-lg text-sm text-[#9C9AA5] focus:outline-none focus:ring-2 focus:ring-[#704180]/20"
-                  required
                 />
               </div>
 

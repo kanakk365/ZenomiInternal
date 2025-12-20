@@ -5,7 +5,7 @@ interface SignupData {
   email: string;
   password: string;
   ownerName: string;
-  licenseNumber: string;
+  licenseNumber?: string;
   position: string;
   website?: string;
 }
@@ -20,7 +20,7 @@ interface Clinician {
   email: string;
   clinicianName: string;
   ownerName: string;
-  licenseNumber: string;
+  licenseNumber?: string;
   position: string;
   website?: string;
 }
@@ -31,20 +31,20 @@ interface AuthResponse {
   clinician: Clinician;
 }
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export async function signup(data: SignupData): Promise<AuthResponse> {
   const response = await fetch(`${baseURL}/clinicians/auth/register`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Signup failed');
+    throw new Error(error.message || "Signup failed");
   }
 
   return response.json();
@@ -52,16 +52,16 @@ export async function signup(data: SignupData): Promise<AuthResponse> {
 
 export async function login(data: LoginData): Promise<AuthResponse> {
   const response = await fetch(`${baseURL}/clinicians/auth/login`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Login failed');
+    throw new Error(error.message || "Login failed");
   }
 
   return response.json();
@@ -69,16 +69,16 @@ export async function login(data: LoginData): Promise<AuthResponse> {
 
 export async function getProfile(accessToken: string): Promise<Clinician> {
   const response = await fetch(`${baseURL}/clinicians/auth/profile`, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch profile');
+    throw new Error(error.message || "Failed to fetch profile");
   }
 
   return response.json();
@@ -102,18 +102,20 @@ interface CoursesResponse {
   allCourses: AllCourse[];
 }
 
-export async function getCourses(accessToken: string): Promise<CoursesResponse> {
+export async function getCourses(
+  accessToken: string
+): Promise<CoursesResponse> {
   const response = await fetch(`${baseURL}/clinicians/courses`, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch courses');
+    throw new Error(error.message || "Failed to fetch courses");
   }
 
   return response.json();
@@ -131,24 +133,27 @@ export async function checkoutStandard(
   courseIds: string[]
 ): Promise<CheckoutResponse> {
   const amount = courseIds.length * 499;
-  
-  const response = await fetch(`${baseURL}/payments/clinicians/checkout/standard`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({
-      amount,
-      currency: 'inr',
-      description: 'Standard Plan',
-      courseIds,
-    }),
-  });
+
+  const response = await fetch(
+    `${baseURL}/payments/clinicians/checkout/standard`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        amount,
+        currency: "inr",
+        description: "Standard Plan",
+        courseIds,
+      }),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Checkout failed');
+    throw new Error(error.message || "Checkout failed");
   }
 
   return response.json();
@@ -158,23 +163,25 @@ export async function checkoutPremium(
   accessToken: string
 ): Promise<CheckoutResponse> {
   const amount = 499 * 6;
-  
-  const response = await fetch(`${baseURL}/payments/clinicians/checkout/premium`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({
-      amount,
-    }),
-  });
+
+  const response = await fetch(
+    `${baseURL}/payments/clinicians/checkout/premium`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        amount,
+      }),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Checkout failed');
+    throw new Error(error.message || "Checkout failed");
   }
 
   return response.json();
 }
-
